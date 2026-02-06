@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KCET Learning Quiz Application</title>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+/* --- GLOBAL STYLING --- */
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #e9ecef; /* Light neutral grey */
+    margin: 0;
+    padding: 20px;
+    color: #212529;
+}
+
+/* --- MAIN CONTAINER --- */
+.container {
+    width: 100%;
+    max-width: 550px;
+    margin: 50px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05); /* Soft shadow */
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+.content-padding {
+    padding: 30px;
+}
+
+/* --- TYPOGRAPHY --- */
+h1 {
+    color: #343a40;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 5px;
+    margin-top: 0;
+}
+
+h2 {
+    color: #6c757d;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+/* --- HEADER (Timer & Status) --- */
+.quiz-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.timer-badge {
+    background: #343a40;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 15px;
+}
+
+.timer-badge.low-time {
+    background: #dc3545; /* Red if low */
+}
+
+/* --- INPUTS --- */
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+input[type="text"]:focus {
+    border-color: #adb5bd;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* --- OPTIONS LIST --- */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+li:hover {
+    border-color: #adb5bd;
+    background: #f8f9fa;
+}
+
+li.selected-option {
+    background: #e7f1ff;
+    border-color: #0d6efd;
+    color: #0c59d1;
+    font-weight: 500;
+}
+
+li label {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+input[type="radio"] {
+    margin-right: 12px;
+    accent-color: #0d6efd;
+    transform: scale(1.1);
+}
+
+/* --- BUTTONS --- */
+button {
+    padding: 12px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button.primary {
+    background: #0d6efd;
+    color: white;
+}
+
+button.primary:hover {
+    background: #0b5ed7;
+}
+
+button.secondary {
+    background: #e9ecef;
+    color: #0080ff;
+}
+
+button.secondary:hover {
+    background: #dee2e6;
+}
+
+button.full-width {
+    width: 100%;
+    margin: 10px 0 0 0;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- NAVIGATION --- */
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f3f5;
+}
+
+/* --- WARNING MODAL (POPUP) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5); /* Dark semi-transparent */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+
+.modal-overlay.active .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    color: #dc3545; /* Red warning title */
+}
+
+.modal-box p {
+    color: #6bbaff;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* --- RESULT STYLING --- */
+.review {
+    background: #f8f9fa;
+    border-left: 4px solid hwb(210 9% 0%);
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.correct { border-left-color: #198754; background: #e8f5e9; }
+.wrong { border-left-color: #dc3545; background: #fff8f8; }
+
+#final-score {
+    font-size: 32px;
+    color: #0d6efd;
+    font-weight: 700;
+    text-align: center;
+    margin: 10px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="container" id="login-page">
+    <div class="content-padding">
+        <h1>KCET Learning Quiz</h1>
+        <h2>Enter your details below</h2>
+
+        <input type="text" id="roll" placeholder="Roll Number">
+        <input type="text" id="name" placeholder="Full Name">
+        <button id="startQuiz" class="primary full-width">Start Quiz</button>
+    </div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div class="container" id="quiz-page" style="display:none;">
+    
+    <!-- Header Bar -->
+    <div class="quiz-header">
+        <span id="question-count">Question 1 / 10</span>
+        <span id="timer-display" class="timer-badge">20:00</span>
+    </div>
+
+    <div class="content-padding">
+        <h2 id="question" style="text-align: left; color: #212529; font-weight: 600; margin-bottom: 25px;">Question Text</h2>
+        
+        <ul id="options"></ul>
+
+        <div class="navigation">
+            <button id="prev" class="secondary">Previous</button>
+            <button id="next" class="secondary">Next</button>
+        </div>
+
+        <button id="submit" class="primary full-width">Submit Quiz</button>
+    </div>
+</div>
+
+<!-- RESULT PAGE -->
+<div class="container" id="result-page" style="display:none;">
+    <div class="content-padding">
+        <h2>Quiz Completed</h2>
+        <p id="student-info" style="text-align: center; color: #6c757d;"></p>
+        
+        <div id="final-score">0/0</div>
+
+        <h3 style="border-bottom: 1px solid #dee2e6; padding-bottom: 10px; margin-top: 25px;">Review Answers</h3>
+        <div id="review-section"></div>
+
+        <button onclick="location.reload()" class="secondary full-width">Restart Quiz</button>
+    </div>
+</div>
+
+<!-- WARNING POPUP MODAL -->
+<div class="modal-overlay" id="warning-modal">
+    <div class="modal-box">
+        <h3>⚠️ Incomplete Quiz</h3>
+        <p id="modal-message">You have unanswered questions. Are you sure you want to submit?</p>
+        <div class="modal-actions">
+            <button id="modal-cancel" class="secondary">Go Back</button>
+            <button id="modal-confirm" class="primary" style="background-color: #dc3545;">Submit Anyway</button>
+        </div>
+    </div>
+</div>
+
+<script>
+ $(document).ready(function(){
+
+    const quizData = [
+        {
+            question: "What does HTML stand for?",
+            options: ["Hyper Text Markup Language", "High Text Machine Language", "Hyper Tool Multi Language", "Home Tool Markup Language"],
+            answer: 0
+        },
+        {
+            question: "Which property is used to change the background color in CSS?",
+            options: ["bgcolor", "color", "background-color", "background-style"],
+            answer: 2
+        },
+        {
+            question: "Which symbol is used as a shortcut for jQuery?",
+            options: ["%", "$", "&", "@"],
+            answer: 1
+        },
+        {
+            question: "Inside which HTML element do we put the JavaScript?",
+            options: ["scripting", "js", "script", "javascript"],
+            answer: 2
+        },
+        {
+            question: "Which data type is used to store true or false values?",
+            options: ["String", "Boolean", "Integer", "Float"],
+            answer: 1
+        },
+        {
+            question: "Which event occurs when the user clicks on an HTML element?",
+            options: ["onmouseover", "onchange", "onmouseclick", "onclick"],
+            answer: 3
+        },
+        {
+            question: "How do you declare a JavaScript variable?",
+            options: ["variable carName;", "v carName;", "var carName;", "val carName;"],
+            answer: 2
+        },
+        {
+            question: "Which CSS property controls the text size?",
+            options: ["font-style", "text-style", "font-size", "text-size"],
+            answer: 2
+        },
+        {
+            question: "What is the correct syntax for referring to an external script called 'app.js'?",
+            options: ["script href='app.js'", "script name='app.js'", "script src='app.js'", "script file='app.js'"],
+            answer: 2
+        },
+        {
+            question: "Which loop is guaranteed to execute at least once?",
+            options: ["for loop", "while loop", "do-while loop", "foreach loop"],
+            answer: 2
+        }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = [];
+    let studentName = "";
+    let rollNo = "";
+    
+    // Timer Variables
+    const totalTime = 20 * 60; 
+    let timeLeft = totalTime;
+    let timerInterval;
+
+    // --- Login Logic ---
+    $("#startQuiz").click(function(){
+        rollNo = $("#roll").val().trim();
+        studentName = $("#name").val().trim();
+
+        if(rollNo === "" || studentName === ""){
+            alert("Please enter Roll Number and Name");
+            return;
+        }
+
+        $("#login-page").fadeOut(200, function(){
+            $("#quiz-page").fadeIn(200);
+        });
+        
+        startTimer();
+        loadQuestion();
+    });
+
+    // --- Timer Logic ---
+    function startTimer() {
+        timerInterval = setInterval(function() {
+            timeLeft--;
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time's up! Submitting quiz automatically.");
+                finalSubmit(); 
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        $("#timer-display").text(minutes + ":" + seconds);
+
+        if (timeLeft < 60) {
+            $("#timer-display").addClass("low-time");
+        }
+    }
+
+    // --- Load Question ---
+    function loadQuestion(){
+        $("#question-count").text(`Question ${currentQuestion + 1} / ${quizData.length}`);
+        $("#question").text(quizData[currentQuestion].question);
+        $("#options").empty();
+
+        quizData[currentQuestion].options.forEach((opt,i)=>{
+            let checked = userAnswers[currentQuestion] === i ? "checked" : "";
+            let selectedClass = userAnswers[currentQuestion] === i ? "selected-option" : "";
+            
+            $("#options").append(`
+                <li class="${selectedClass}">
+                    <label>
+                        <input type="radio" name="option" value="${i}" ${checked}>
+                        ${opt}
+                    </label>
+                </li>
+            `);
+        });
+
+        // Click event to select option
+        $("li").click(function(e){
+            if(e.target.tagName !== 'INPUT') {
+                $(this).find("input").prop("checked", true);
+            }
+            $("li").removeClass("selected-option");
+            $(this).addClass("selected-option");
+        });
+
+        // Button Visibility Logic
+        $("#prev").prop("disabled", currentQuestion === 0);
+        
+        if(currentQuestion === quizData.length - 1){
+            $("#next").hide();
+            $("#submit").show();
+        } else {
+            $("#next").show();
+            $("#submit").hide();
+        }
+    }
+
+    function saveAnswer(){
+        let selected = $("input[name='option']:checked").val();
+        if(selected !== undefined){
+            userAnswers[currentQuestion] = parseInt(selected);
+        }
+    }
+
+    $("#next").click(function(){
+        saveAnswer();
+        if(currentQuestion < quizData.length - 1){
+            currentQuestion++;
+            loadQuestion();
+        }
+    });
+
+    $("#prev").click(function(){
+        saveAnswer();
+        if(currentQuestion > 0){
+            currentQuestion--;
+            loadQuestion();
+        }
+    });
+
+    // --- Submit & Modal Logic ---
+    $("#submit").click(function(){
+        saveAnswer();
+
+        let answeredCount = userAnswers.filter(a => a !== undefined).length;
+        let unanswered = quizData.length - answeredCount;
+
+        if(unanswered > 0){
+            // Show Popup instead of inline warning
+            $("#modal-message").text(`You have ${unanswered} unanswered question(s). Are you sure you want to submit?`);
+            $("#warning-modal").addClass("active");
+        } else {
+            clearInterval(timerInterval);
+            finalSubmit();
+        }
+    });
+
+    // Handle Modal Buttons
+    $("#modal-cancel").click(function(){
+        $("#warning-modal").removeClass("active");
+    });
+
+    $("#modal-confirm").click(function(){
+        $("#warning-modal").removeClass("active");
+        clearInterval(timerInterval);
+        finalSubmit();
+    });
+
+    function finalSubmit(){
+        $("#quiz-page").fadeOut(200, function(){
+            $("#result-page").fadeIn(200);
+        });
+
+        let score = 0;
+        $("#review-section").empty();
+
+        quizData.forEach((q,i)=>{
+            let userAns = userAnswers[i];
+            let correct = q.answer;
+            let isCorrect = (userAns === correct);
+
+            if(isCorrect) score++;
+
+            let cssClass = isCorrect ? "correct" : "wrong";
+            let userText = userAns !== undefined ? q.options[userAns] : "Skipped";
+
+            $("#review-section").append(`
+                <div class="review ${cssClass}">
+                    <div style="font-weight: 600; margin-bottom: 4px;">Q${i+1}: ${q.question}</div>
+                    <div style="font-size: 13px; color: #495057;">
+                        You: <span style="font-weight: 500; color: #212529;">${userText}</span>
+                        ${!isCorrect ? `<br>Correct: <span style="font-weight: 500; color: #198754;">${q.options[correct]}</span>` : ''}
+                    </div>
+                </div>
+            `);
+        });
+
+        $("#student-info").text(`${studentName} (${rollNo})`);
+        $("#final-score").text(`${score} / ${quizData.length}`);
+    }
+
+});
+</script>
+
+</body>
+</html>
