@@ -1,0 +1,257 @@
+const express = require('express');
+const mongoose = require('mongoose');
+
+const app = express();
+app.use(express.json());
+app.use(express.static('public'));
+
+mongoose.connect('mongodb://127.0.0.1:27017/schoolDB')
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.log(err));
+
+const Student = mongoose.model('Student', new mongoose.Schema({
+  name: String,
+  age: Number,
+  grade: String
+}));
+
+// API Routes
+app.post('/api/students', async (req, res) => {
+  await Student.create(req.body);
+  res.send({ success: true });
+});
+
+app.get('/api/students', async (req, res) => {
+  const students = await Student.find();
+  res.json(students);
+});
+
+app.put('/api/students/:id', async (req, res) => {
+  await Student.findByIdAndUpdate(req.params.id, req.body);
+  res.send({ success: true });
+});
+
+app.delete('/api/students/:id', async (req, res) => {
+  await Student.findByIdAndDelete(req.params.id);
+  res.send({ success: true });
+});
+
+app.listen(3000, () => {
+  console.log('Server running! Open http://localhost:3000');
+});
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Manager</title>
+    <style>
+        /* General Page Setup */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        /* Main Card Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Styling */
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            min-width: 150px;
+        }
+
+        input:focus {
+            border-color: #3498db;
+        }
+
+        /* Add Button */
+        .add-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .add-btn:hover {
+            background-color: #219150;
+            transform: translateY(-2px);
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Action Buttons inside table */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .edit-btn { background-color: #f39c12; }
+        .del-btn { background-color: #e74c3c; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Student Management</h2>
+
+        <div class="input-group">
+            <input type="text" id="name" placeholder="Student Name">
+            <input type="number" id="age" placeholder="Age">
+            <input type="text" id="grade" placeholder="Grade (e.g. A, B+)">
+            <button class="add-btn" onclick="addStudent()">+ Add Student</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+                <!-- JS fills this -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Load students on start
+        loadStudents();
+
+        async function loadStudents() {
+            const response = await fetch('/api/students');
+            const students = await response.json();
+            
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student.name}</td>
+                        <td>${student.age}</td>
+                        <td><span style="background:#e8f6f3; color:#16a085; padding:2px 8px; border-radius:4px; font-weight:bold;">${student.grade}</span></td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="updateStudent('${student._id}')">Edit</button>
+                            <button class="action-btn del-btn" onclick="deleteStudent('${student._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function addStudent() {
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const grade = document.getElementById('grade').value;
+
+            if(!name || !age) return alert("Please fill in Name and Age");
+
+            await fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age, grade })
+            });
+
+            document.getElementById('name').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('grade').value = '';
+            loadStudents();
+        }
+
+        async function deleteStudent(id) {
+            if(confirm('Delete this student?')) {
+                await fetch(`/api/students/${id}`, { method: 'DELETE' });
+                loadStudents();
+            }
+        }
+
+        async function updateStudent(id) {
+            const newGrade = prompt("Enter new grade:");
+            if (newGrade) {
+                await fetch(`/api/students/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ grade: newGrade })
+                });
+                loadStudents();
+            }
+        }
+    </script>
+</body>
+</html>
