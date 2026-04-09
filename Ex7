@@ -1,0 +1,92 @@
+// File: index.js
+const { MongoClient } = require('mongodb');
+const fs = require('fs'); // This is used to write to a file
+
+// Connection URL
+const url = "mongodb://localhost:27017";
+const client = new MongoClient(url);
+const dbName = "payroll_db";
+
+async function run() {
+  try {
+    // 1. Connect to Database
+    await client.connect();
+    console.log("✅ Connected to database");
+    const db = client.db(dbName);
+    const collection = db.collection("employees");
+
+    // 2. Prepare the Report File (Clear old report if it exists)
+    const reportFileName = "payroll_report.txt";
+    fs.writeFileSync(reportFileName, "PAYROLL ANALYSIS REPORT\n");
+    fs.appendFileSync(reportFileName, "========================\n\n");
+
+    // 3. Insert (Reset) Data
+    await collection.deleteMany({});
+    const employees = [
+      { name: "Alice", department: "IT", role: "Developer", salary: 5000 },
+      { name: "Bob", department: "IT", role: "Manager", salary: 8000 },
+      { name: "Charlie", department: "HR", role: "Recruiter", salary: 4000 },
+      { name: "David", department: "Sales", role: "Salesman", salary: 4500 },
+      { name: "Eve", department: "Sales", role: "Manager", salary: 7000 }
+    ];
+    await collection.insertMany(employees);
+    console.log("📥 Data inserted successfully\n");
+
+    // ---------------------------------------------------------
+    // 4. ANALYSIS 1: TOTAL SALARY EXPENSE
+    // ---------------------------------------------------------
+    const totalExpense = await collection.aggregate([
+      { $group: { _id: null, total_spent: { $sum: "$salary" } } }
+    ]).toArray();
+
+    const result1 = `1. Total Company Salary: $${totalExpense[0].total_spent}`;
+    
+    // Print to Terminal
+    console.log(result1); 
+    // Save to File
+    fs.appendFileSync(reportFileName, result1 + "\n");
+
+
+    // ---------------------------------------------------------
+    // 5. ANALYSIS 2: AVERAGE SALARY BY DEPARTMENT
+    // ---------------------------------------------------------
+    const avgSalary = await collection.aggregate([
+      { $group: { _id: "$department", average_salary: { $avg: "$salary" } } }
+    ]).toArray();
+
+    const result2 = "\n2. Average Salary per Department:\n" + JSON.stringify(avgSalary, null, 2);
+    
+    // Print to Terminal
+    console.log(result2);
+    // Save to File
+    fs.appendFileSync(reportFileName, result2 + "\n");
+
+
+    // ---------------------------------------------------------
+    // 6. ANALYSIS 3: HIGHEST PAID EMPLOYEE
+    // ---------------------------------------------------------
+    const highestPaid = await collection.aggregate([
+      { $sort: { salary: -1 } },
+      { $limit: 1 },
+      { $project: { name: 1, salary: 1, department: 1, _id: 0 } }
+    ]).toArray();
+
+    const topEmp = highestPaid[0];
+    const result3 = `\n3. Highest Paid Employee: ${topEmp.name} (${topEmp.department}) - $${topEmp.salary}`;
+    
+    // Print to Terminal
+    console.log(result3);
+    // Save to File
+    fs.appendFileSync(reportFileName, result3 + "\n");
+
+    console.log(`\n✨ Analysis Complete! Results saved to '${reportFileName}'`);
+
+  } catch (err) {
+    console.error("❌ Error:", err);
+  } finally {
+    // Close the connection when done
+    await client.close();
+  }
+}
+
+run();
