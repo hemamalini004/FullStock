@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopFeedback | Professional Survey</title>
+    <style>
+        /* --- PROFESSIONAL THEME VARIABLES --- */
+        :root {
+            /* Palette: Slate & Indigo */
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #64748b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0; /* The "Line" color */
+            --success: #10b981;
+            --error: #ef4444;
+            
+            /* Spacing & Radius */
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        /* --- GLOBAL RESET & TYPOGRAPHY --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container Utility - Flex Column to stick footer to bottom */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px; /* Ensures footer has space */
+        }
+
+        .wide { max-width: 850px; text-align: left; }
+
+        /* --- VIEW 1: WELCOME (HERO) --- */
+        #view-welcome {
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.5)), 
+                        url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            animation: fadeIn 1s ease-out;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        .btn-hero {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Welcome Footer */
+        .footer-welcome {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 2rem 1rem;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            z-index: 20;
+        }
+        .footer-welcome a { color: white; text-decoration: none; margin: 0 15px; opacity: 0.8; transition: 0.2s; font-weight: 500; }
+        .footer-welcome a:hover { opacity: 1; text-decoration: underline; }
+
+        /* --- VIEW 2: LOGIN --- */
+        #view-login {
+            background: url('https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            max-width: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 400px;
+        }
+
+        /* Login Footer - Neat Line */
+        .footer-login {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--secondary);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* --- NAVBAR --- */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .nav h2 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+        .nav a { text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+        .nav a.logout { color: var(--error); }
+        .nav a.logout:hover { color: #b91c1c; }
+        .nav a.back-link { color: var(--secondary); }
+        .nav a.back-link:hover { color: var(--text-main); }
+
+        /* --- FORMS & INPUTS --- */
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-main);
+        }
+
+        input[type="text"], input[type="password"], select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        /* --- STARS --- */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 4px;
+            font-size: 1.75rem;
+        }
+        .star-rating input { display: none; }
+        .star-rating label { 
+            color: #cbd5e1; 
+            cursor: pointer; 
+            margin: 0; 
+            transition: color 0.2s, transform 0.2s;
+        }
+        .star-rating label:hover { transform: scale(1.1); }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label { color: #f59e0b; }
+
+        /* --- DASHBOARD --- */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-grow: 1;
+        }
+
+        .card {
+            display: block;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card h3 { margin: 0 0 0.5rem 0; color: var(--text-main); font-size: 1.25rem; }
+        .card p { margin: 0; color: var(--secondary); font-size: 0.95rem; }
+
+        /* --- STANDARD FOOTER (Home & Survey) - NEAT LINE --- */
+        .standard-footer {
+            margin-top: auto; /* Pushes to bottom if container is flex */
+            padding-top: 2rem; /* Space above the line */
+            border-top: 1px solid var(--border); /* THE NEAT LINE */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Desktop Layout for Footer */
+        @media (min-width: 640px) {
+            .standard-footer {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+        }
+
+        .footer-links a { 
+            color: var(--secondary); 
+            text-decoration: none; 
+            margin-left: 1.5rem; 
+            font-size: 0.85rem; 
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+        .footer-links a:hover { color: var(--primary); }
+        .footer-links a:first-child { margin-left: 0; }
+
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .alert-error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+        .alert-success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+
+        .product-context {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .section-header {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--secondary);
+            font-weight: 700;
+            margin: 2rem 0 1rem 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- VIEW 1: WELCOME (Professional Hero) -->
+    <div id="view-welcome" class="hidden">
+        <div class="hero-content">
+            <h1>Elevate Your Shopping Experience</h1>
+            <p>Your feedback drives our innovation. Join our exclusive survey program to help shape the future of retail.</p>
+            <a href="/login" class="btn-hero">Start Survey</a>
+        </div>
+        
+        <!-- Welcome Page Footer -->
+        <footer class="footer-welcome">
+            <div style="font-weight: 600;">© 2024 ShopFeedback Inc. All rights reserved.</div>
+            <div style="margin-top: 5px;">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 2: LOGIN -->
+    <div id="view-login" class="hidden">
+        <div class="login-card">
+            <div>
+                <div style="margin-bottom: 2rem; text-align: center;">
+                    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Welcome Back</h1>
+                    <p style="color: var(--secondary);">Please enter your details to sign in.</p>
+                </div>
+
+                <div id="login-error" class="alert alert-error hidden">
+                    Invalid credentials. Please try <strong>admin</strong> / <strong>password</strong>.
+                </div>
+
+                <form action="/login" method="POST">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+                
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <a href="/welcome" class="back-link">← Back to Home</a>
+                </div>
+            </div>
+
+            <!-- Login Page Footer - With Line -->
+            <footer class="footer-login">
+                <div>© 2024 ShopFeedback Inc.</div>
+                <div style="opacity: 0.7; font-size: 0.75rem; margin-top: 4px;">Secure System v2.0</div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- VIEW 3: HOME (DASHBOARD) -->
+    <div id="view-home" class="container wide hidden">
+        <nav class="nav">
+            <h2>Dashboard</h2>
+            <a href="/logout" class="logout">Sign Out</a>
+        </nav>
+
+        <div id="home-success" class="alert alert-success hidden">
+            Thank you! Your feedback has been recorded successfully.
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">Hello, Admin</h1>
+            <p style="color: var(--secondary);">Here is an overview of your survey activities.</p>
+        </div>
+        
+        <div class="grid-cards">
+            <a href="/survey" class="card">
+                <span class="card-icon">📝</span>
+                <h3>New Survey</h3>
+                <p>Provide feedback on your recent order #9921.</p>
+            </a>
+            <a href="/results" target="_blank" class="card">
+                <span class="card-icon">📊</span>
+                <h3>View Data</h3>
+                <p>Access raw survey results in JSON format.</p>
+            </a>
+            <div class="card" style="cursor: default; opacity: 0.7;">
+                <span class="card-icon">📈</span>
+                <h3>Analytics</h3>
+                <p>Visual reports coming soon.</p>
+            </div>
+        </div>
+
+        <!-- Home Page Footer - Neat Line & Bottom Alignment -->
+        <footer class="standard-footer">
+            <div class="footer-copyright">© 2024 ShopFeedback Inc.</div>
+            <div class="footer-links">
+                <a href="#">Help Center</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 4: SURVEY FORM -->
+    <div id="view-survey" class="container wide hidden">
+        <nav class="nav">
+            <h2>Customer Survey</h2>
+            <a href="/home" class="back-link">Cancel</a>
+        </nav>
+
+        <form action="/submit-survey" method="POST">
+            <div class="product-context">
+                <img src="https://picsum.photos/seed/tech/60/60" style="border-radius: 6px; border: 1px solid #ddd;" alt="Product">
+                <div>
+                    <div style="font-weight: 700; color: var(--text-main);">Order #9921</div>
+                    <div style="font-size: 0.85rem; color: var(--secondary);">Wireless Noise Cancelling Headphones</div>
+                </div>
+            </div>
+
+            <div class="section-header">Customer Details</div>
+            
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="customerName" placeholder="e.g. Jane Doe" required>
+            </div>
+
+            <div class="section-header">Experience & Quality</div>
+
+            <div class="form-group">
+                <label>1. How was your overall shopping experience?</label>
+                <div class="star-rating">
+                    <input type="radio" id="o5" name="overallExp" value="5" required><label for="o5" title="Excellent">★</label>
+                    <input type="radio" id="o4" name="overallExp" value="4"><label for="o4" title="Good">★</label>
+                    <input type="radio" id="o3" name="overallExp" value="3"><label for="o3" title="Average">★</label>
+                    <input type="radio" id="o2" name="overallExp" value="2"><label for="o2" title="Poor">★</label>
+                    <input type="radio" id="o1" name="overallExp" value="1"><label for="o1" title="Terrible">★</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>2. Were you satisfied with the product quality?</label>
+                <div class="star-rating">
+                    <input type="radio" id="q5" name="qualitySatisfaction" value="5" required><label for="q5">★</label>
+                    <input type="radio" id="q4" name="qualitySatisfaction" value="4"><label for="q4">★</label>
+                    <input type="radio" id="q3" name="qualitySatisfaction" value="3"><label for="q3">★</label>
+                    <input type="radio" id="q2" name="qualitySatisfaction" value="2"><label for="q2">★</label>
+                    <input type="radio" id="q1" name="qualitySatisfaction" value="1"><label for="q1">★</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>3. Did you find exactly what you were looking for?</label>
+                <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                    <label style="font-weight: 400; cursor: pointer;"><input type="radio" name="foundProduct" value="yes" required> Yes</label>
+                    <label style="font-weight: 400; cursor: pointer;"><input type="radio" name="foundProduct" value="no"> No</label>
+                    <label style="font-weight: 400; cursor: pointer;"><input type="radio" name="foundProduct" value="partially"> Partially</label>
+                </div>
+            </div>
+
+            <div class="section-header">Delivery & Service</div>
+
+            <div class="form-group">
+                <label>4. How was the delivery speed?</label>
+                <select name="deliverySpeed" required>
+                    <option value="" disabled selected>Select an option...</option>
+                    <option value="5">Very Fast (Arrived Early)</option>
+                    <option value="4">On Time</option>
+                    <option value="3">Acceptable</option>
+                    <option value="2">Late</option>
+                    <option value="1">Very Late / Lost</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>5. How easy was it to navigate our website/app?</label>
+                <div class="star-rating">
+                    <input type="radio" id="n5" name="navigationEase" value="5" required><label for="n5">★</label>
+                    <input type="radio" id="n4" name="navigationEase" value="4"><label for="n4">★</label>
+                    <input type="radio" id="n3" name="navigationEase" value="3"><label for="n3">★</label>
+                    <input type="radio" id="n2" name="navigationEase" value="2"><label for="n2">★</label>
+                    <input type="radio" id="n1" name="navigationEase" value="1"><label for="n1">★</label>
+                </div>
+            </div>
+
+            <div class="section-header">Future & Feedback</div>
+
+            <div class="form-group">
+                <label>6. How likely are you to recommend us to a friend?</label>
+                <div class="star-rating">
+                    <input type="radio" id="r5" name="recommendation" value="5" required><label for="r5">★</label>
+                    <input type="radio" id="r4" name="recommendation" value="4"><label for="r4">★</label>
+                    <input type="radio" id="r3" name="recommendation" value="3"><label for="r3">★</label>
+                    <input type="radio" id="r2" name="recommendation" value="2"><label for="r2">★</label>
+                    <input type="radio" id="r1" name="recommendation" value="1"><label for="r1">★</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>7. How likely are you to shop with us again?</label>
+                <select name="returnLikelihood" required>
+                    <option value="" disabled selected>Select likelihood...</option>
+                    <option value="Definitely">Definitely</option>
+                    <option value="Maybe">Maybe</option>
+                    <option value="Unsure">Unsure</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>8. Any additional comments?</label>
+                <textarea name="comments" rows="4" placeholder="Share your thoughts with us..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 1rem;">Submit Feedback</button>
+        </form>
+
+        <!-- Survey Page Footer - Neat Line & Bottom Alignment -->
+        <footer class="standard-footer">
+            <div class="footer-copyright">© 2024 ShopFeedback Inc.</div>
+            <div class="footer-links">
+                <a href="#">Support</a>
+                <a href="#">Privacy</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ROUTING LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const path = window.location.pathname;
+            const views = {
+                'view-welcome': document.getElementById('view-welcome'),
+                'view-login': document.getElementById('view-login'),
+                'view-home': document.getElementById('view-home'),
+                'view-survey': document.getElementById('view-survey')
+            };
+
+            function hideAll() {
+                Object.values(views).forEach(el => el.classList.add('hidden'));
+            }
+
+            if (path === '/welcome') {
+                hideAll();
+                views['view-welcome'].classList.remove('hidden');
+            } 
+            else if (path === '/login') {
+                hideAll();
+                views['view-login'].classList.remove('hidden');
+                if (new URLSearchParams(window.location.search).get('error') === 'invalid') {
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } 
+            else if (path === '/home') {
+                hideAll();
+                views['view-home'].classList.remove('hidden');
+                if (new URLSearchParams(window.location.search).get('status') === 'success') {
+                    document.getElementById('home-success').classList.remove('hidden');
+                }
+            } 
+            else if (path === '/survey') {
+                hideAll();
+                views['view-survey'].classList.remove('hidden');
+            } 
+            else {
+                hideAll();
+                views['view-welcome'].classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+const session = require('express-session');
+
+const app = express();
+const PORT = 3000;
+
+// Mock Database
+let surveyResponses = [];
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('templates'));
+
+// Session Middleware
+app.use(session({
+    secret: 'mySecretKey123',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 60000 }
+}));
+
+// Middleware to protect routes
+const requireLogin = (req, res, next) => {
+    if (req.session.user) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+};
+
+// --- ROUTES ---
+
+app.get('/', (req, res) => {
+    if (req.session.user) res.redirect('/home');
+    else res.redirect('/welcome');
+});
+
+app.get('/welcome', (req, res) => {
+    if (req.session.user) res.redirect('/home');
+    else res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
+app.get('/login', (req, res) => {
+    if (req.session.user) res.redirect('/home');
+    else res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
+app.get('/home', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
+app.get('/survey', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
+// POST Login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'password') {
+        req.session.user = username;
+        res.redirect('/home');
+    } else {
+        res.redirect('/login?error=invalid');
+    }
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/welcome');
+});
+
+// POST Submit Survey (Updated to handle 8 questions)
+app.post('/submit-survey', requireLogin, (req, res) => {
+    // Extract all 8 questions + Name
+    const {
+        customerName,
+        overallExp,          // Q1
+        qualitySatisfaction, // Q2
+        deliverySpeed,       // Q3
+        navigationEase,      // Q4
+        foundProduct,        // Q5
+        recommendation,      // Q6
+        returnLikelihood,    // Q7
+        comments             // Q8
+    } = req.body;
+
+    const newEntry = {
+        id: surveyResponses.length + 1,
+        customerName,
+        answers: {
+            overallExp,
+            qualitySatisfaction,
+            deliverySpeed,
+            navigationEase,
+            foundProduct,
+            recommendation,
+            returnLikelihood
+        },
+        comments,
+        date: new Date().toLocaleString()
+    };
+
+    surveyResponses.push(newEntry);
+    console.log("New Detailed Feedback Received:", newEntry);
+    res.redirect('/home?status=success');
+});
+
+app.get('/results', requireLogin, (req, res) => res.json(surveyResponses));
+
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+});
